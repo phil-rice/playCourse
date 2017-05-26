@@ -1,10 +1,8 @@
 package status
 
 import controllers.BuildResponseForPlay
-import play.api.libs.ws.WSClient
 import play.api.mvc.{AnyContent, Request, Result, Results}
 
-import scala.collection.immutable
 import scala.concurrent.{ExecutionContext, Future}
 
 case class StatusRequest(urls: List[String])
@@ -29,20 +27,6 @@ object StatusResponse {
   }
 
 }
-
-class OriginalStatusService(isUpService: IsUpService)(implicit executionContext: ExecutionContext) extends (StatusRequest => Future[StatusResponse]) {
-
-  override def apply(req: StatusRequest): Future[StatusResponse] = {
-    val futureOfResults: Seq[Future[IsUpResult]] =
-      req.urls.
-        map(IsUpRequest(_)).
-        map(isUpService)
-    //the type of futureOfResults is neither use nor ornament
-
-    Future.sequence(futureOfResults).map(StatusResponse(_))
-  }
-}
-
 
 class StatusService(isUpService: IsUpService)(implicit executionContext: ExecutionContext) extends (StatusRequest => Future[StatusResponse]) with Arrow {
 

@@ -2,16 +2,16 @@ package controllers
 
 import javax.inject._
 
-import play.api._
+import controllers.BuildResponseForPlay._
 import play.api.libs.ws.WSClient
 import play.api.mvc._
-import status.IsUpResult.BuildResponseForPlayForIsUpResult.BadGateway
 import status._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 @Singleton
-class HomeController @Inject()(wsClient: WSClient)(implicit ec: ExecutionContext) extends Controller {
+class HomeController @Inject()(wsClient: WSClient)(implicit ec: ExecutionContext) extends Controller with Arrow{
+
 
   val isItUpService = new IsUpService(wsClient)
   val statusService = new StatusService(isItUpService)
@@ -22,16 +22,11 @@ class HomeController @Inject()(wsClient: WSClient)(implicit ec: ExecutionContext
   }
 
   def isGoogleUp = Action.async { implicit request =>
-    isItUpService(IsUpRequest("http://www.google.com")).map { t =>
-      if (t.up)
-        Ok("Google is Up")
-      else
-        BadGateway("Google is Down")
-    }
+    IsUpRequest("http://www.google.com") ~> isItUpService ~>  toResponseForPlay[IsUpResult]
   }
 
   def status = Action.async { implicit request =>
-    statusService(StatusRequest(List("http:www.google.com"))).map(BuildResponseForPlay.apply[StatusResponse])
+     StatusRequest(List("http://www.google.com", "http://www.slack.com")) ~> statusService ~> toResponseForPlay[StatusResponse]
   }
 
   def ping = Action { implicit request =>

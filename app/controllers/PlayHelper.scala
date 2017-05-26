@@ -1,7 +1,6 @@
 package controllers
 
 import play.api.mvc.{AnyContent, Request, Result}
-import play.mvc.Http.Response
 
 
 trait BuildResponseForPlay[T] {
@@ -9,6 +8,6 @@ trait BuildResponseForPlay[T] {
 }
 
 object BuildResponseForPlay {
-  def apply[T](t: T)(implicit request: Request[AnyContent], buildResponseForPlay: BuildResponseForPlay[T]) =
+  def toResponseForPlay[T](t: T)(implicit request: Request[AnyContent], buildResponseForPlay: BuildResponseForPlay[T]) =
     buildResponseForPlay(t)
 }
